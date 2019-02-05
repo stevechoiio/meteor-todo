@@ -6,6 +6,7 @@ import Todo from "../../components/ToDoInput";
 import { ToDos } from "../../../api/todo";
 import { withTracker } from "meteor/react-meteor-data";
 import PropTypes from "prop-types";
+import AccountsUIWrapper from "../../components/AccountsUIWrapper/index";
 
 //Stateful Component
 class App extends Component {
@@ -51,37 +52,43 @@ class App extends Component {
     const { todos } = this.props;
     console.log(todos);
     return (
-      <div className="todo-list">
-        {showHeader ? <h1>So Much To Do</h1> : <h1>Untitled Project</h1>}
-        <h2>Bob's To Do List</h2>
-        <button
-          onClick={() => {
-            this.setState({ name: "John Wick" });
-          }}
-        >
-          Change Name
-        </button>
-        <div className="add-todo">
-          <form name="addTodo" onSubmit={this.addToDo}>
-            <input type="text" ref={this.toDoInput} />
-            <span>(press enter to add)</span>
-          </form>
+      <div className="app-wrapper">
+        <div className="login-wrapper">
+          <AccountsUIWrapper />
         </div>
-        <ul>
-          {todos.map(todo => (
-            <Todo
-              key={todo._id}
-              item={todo}
-              toggleComplete={this.toggleComplete}
-              removeToDo={this.removeToDo}
-            />
-          ))}
-        </ul>
-        <div className="todo-admin">
-          <ToDoCount number={todos.length} />
-          {this.hasCompleted() && (
-            <ClearButton removeCompleted={this.removeCompleted} />
-          )}
+
+        <div className="todo-list">
+          {showHeader ? <h1>So Much To Do</h1> : <h1>Untitled Project</h1>}
+          <h2>Bob's To Do List</h2>
+          <button
+            onClick={() => {
+              this.setState({ name: "John Wick" });
+            }}
+          >
+            Change Name
+          </button>
+          <div className="add-todo">
+            <form name="addTodo" onSubmit={this.addToDo}>
+              <input type="text" ref={this.toDoInput} />
+              <span>(press enter to add)</span>
+            </form>
+          </div>
+          <ul>
+            {todos.map(todo => (
+              <Todo
+                key={todo._id}
+                item={todo}
+                toggleComplete={this.toggleComplete}
+                removeToDo={this.removeToDo}
+              />
+            ))}
+          </ul>
+          <div className="todo-admin">
+            <ToDoCount number={todos.length} />
+            {this.hasCompleted() && (
+              <ClearButton removeCompleted={this.removeCompleted} />
+            )}
+          </div>
         </div>
       </div>
     );
@@ -98,6 +105,8 @@ App.defaultProps = {
 
 export default withTracker(() => {
   return {
+    currentUser: Meteor.user(), // NEW!
+    currentUserId: Meteor.userId(), // NEW!
     todos: ToDos.find({}).fetch()
   };
 })(App);
