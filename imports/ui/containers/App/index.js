@@ -130,10 +130,21 @@ App.defaultProps = {
   todos: []
 };
 
+/*
 export default withTracker(() => {
   return {
     currentUser: Meteor.user(), // NEW!
     currentUserId: Meteor.userId(), // NEW!
+    todos: ToDos.find({}).fetch()
+  };
+})(App);
+*/
+
+export default withTracker(() => {
+  Meteor.subscribe("todos");
+  return {
+    currentUser: Meteor.user(),
+    currentUserId: Meteor.userId(),
     todos: ToDos.find({}).fetch()
   };
 })(App);

@@ -2,6 +2,12 @@ import { Mongo } from "meteor/mongo";
 import { Meteor } from "meteor/meteor";
 export const ToDos = new Mongo.Collection("todos");
 
+if (Meteor.isServer) {
+  Meteor.publish("todos", function todosPublication() {
+    return ToDos.find({ owner: this.userId });
+  });
+}
+
 Meteor.methods({
   "todos.toggleComplete"(todo) {
     if (todo.owner !== this.userId) {
@@ -47,7 +53,10 @@ Meteor.methods({
         "You are not allowed to remove completed items for other users."
       );
     }
-    const todos = ToDos.find({ complete: true }, { _id: 0 });
+    const todos = ToDos.find(
+      { complete: true, owner: this.userId },
+      { _id: 0 }
+    );
     todos.forEach(todo => ToDos.remove({ _id: todo._id }));
   }
 });
