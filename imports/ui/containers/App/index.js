@@ -41,55 +41,71 @@ class App extends Component {
     event.preventDefault();
     let toDoInput = this.toDoInput.current;
     if (toDoInput.value) {
-      ToDos.insert({ title: toDoInput.value, complete: false });
+      ToDos.insert({
+        title: toDoInput.value,
+        complete: false,
+        owner: this.props.currentUserId // NEW!
+      });
+
       toDoInput.value = "";
     }
   };
 
   render() {
     const showHeader = true;
+    console.log(this.props.currentUserId);
 
-    const { todos } = this.props;
-    console.log(todos);
+    const { todos, currentUserId } = this.props;
+
     return (
       <div className="app-wrapper">
         <div className="login-wrapper">
           <AccountsUIWrapper />
         </div>
+        {currentUserId ? (
+          <div className="todo-list">
+            {showHeader ? <h1>So Much To Do</h1> : <h1>Untitled Project</h1>}
+            <h2>Bob's To Do List</h2>
 
-        <div className="todo-list">
-          {showHeader ? <h1>So Much To Do</h1> : <h1>Untitled Project</h1>}
-          <h2>Bob's To Do List</h2>
-          <button
-            onClick={() => {
-              this.setState({ name: "John Wick" });
-            }}
-          >
-            Change Name
-          </button>
-          <div className="add-todo">
-            <form name="addTodo" onSubmit={this.addToDo}>
-              <input type="text" ref={this.toDoInput} />
-              <span>(press enter to add)</span>
-            </form>
+            <button
+              onClick={() => {
+                this.setState({ name: "John Wick" });
+              }}
+            >
+              Change Name
+            </button>
+            <div className="add-todo">
+              <form name="addTodo" onSubmit={this.addToDo}>
+                <input type="text" ref={this.toDoInput} />
+                <span>(press enter to add)</span>
+              </form>
+            </div>
+            <ul>
+              {todos.map(todo => {
+                if (todo.owner == currentUserId) {
+                  return (
+                    <Todo
+                      key={todo._id}
+                      item={todo}
+                      toggleComplete={this.toggleComplete}
+                      removeToDo={this.removeToDo}
+                    />
+                  );
+                }
+              })}
+            </ul>
+            <div className="todo-admin">
+              <ToDoCount number={todos.length} />
+              {this.hasCompleted() && (
+                <ClearButton removeCompleted={this.removeCompleted} />
+              )}
+            </div>
           </div>
-          <ul>
-            {todos.map(todo => (
-              <Todo
-                key={todo._id}
-                item={todo}
-                toggleComplete={this.toggleComplete}
-                removeToDo={this.removeToDo}
-              />
-            ))}
-          </ul>
-          <div className="todo-admin">
-            <ToDoCount number={todos.length} />
-            {this.hasCompleted() && (
-              <ClearButton removeCompleted={this.removeCompleted} />
-            )}
+        ) : (
+          <div className="logged-out-message">
+            <p>Please sign in to see your todos.</p>
           </div>
-        </div>
+        )}
       </div>
     );
   }
