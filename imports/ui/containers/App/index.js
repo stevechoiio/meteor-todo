@@ -7,6 +7,7 @@ import { ToDos } from "../../../api/todo";
 import { withTracker } from "meteor/react-meteor-data";
 import PropTypes from "prop-types";
 import AccountsUIWrapper from "../../components/AccountsUIWrapper/index";
+import { Meteor } from "meteor/meteor";
 
 //Stateful Component
 class App extends Component {
@@ -16,15 +17,17 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.toDoInput.current.focus();
+    // this.toDoInput.current.focus();
   }
 
-  toggleComplete = item => {
-    ToDos.update({ _id: item._id }, { $set: { complete: !item.complete } });
+  toggleComplete = todo => {
+    // ToDos.update({ _id: item._id }, { $set: { complete: !item.complete } });
+    Meteor.call("todos.toggleComplete", todo);
   };
 
   removeToDo = item => {
-    ToDos.remove({ _id: item._id });
+    Meteor.call("todos.removeToDo", item);
+    // ToDos.remove({ _id: item._id });
   };
 
   hasCompleted = () => {
@@ -33,22 +36,26 @@ class App extends Component {
   };
 
   removeCompleted = () => {
-    const todos = ToDos.find({ complete: true }, { _id: 0 });
-    todos.forEach(todo => ToDos.remove({ _id: todo._id }));
+    Meteor.call("todos.removeCompleted", {});
+    // const todos = ToDos.find({ complete: true }, { _id: 0 });
+    // todos.forEach(todo => ToDos.remove({ _id: todo._id }));
   };
 
   addToDo = event => {
     event.preventDefault();
     let toDoInput = this.toDoInput.current;
-    if (toDoInput.value) {
-      ToDos.insert({
-        title: toDoInput.value,
-        complete: false,
-        owner: this.props.currentUserId // NEW!
-      });
+    // if (toDoInput.value) {
+    //   ToDos.insert({
+    //     title: toDoInput.value,
+    //     complete: false,
+    //     owner: this.props.currentUserId // NEW!
+    //   });
 
-      toDoInput.value = "";
-    }
+    //   toDoInput.value = "";
+    // }
+
+    Meteor.call("todos.addToDo", toDoInput.value);
+    toDoInput.value = "";
   };
 
   render() {
@@ -95,7 +102,11 @@ class App extends Component {
               })}
             </ul>
             <div className="todo-admin">
-              <ToDoCount number={todos.length} />
+              <ToDoCount
+                number={
+                  todos.filter(todo => todo.owner == currentUserId).length
+                }
+              />
               {this.hasCompleted() && (
                 <ClearButton removeCompleted={this.removeCompleted} />
               )}
